@@ -8,6 +8,7 @@ import merchantRoutes from './routes/merchantRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import whatsappRoutes from './routes/whatsappRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -23,6 +24,7 @@ app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/delivery', deliveryRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/whatsapp', whatsappRoutes);
+app.use('/api/v1/users', userRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 

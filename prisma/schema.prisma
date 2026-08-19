@@ -97,6 +97,7 @@ model Product {
   orderItems  OrderItem[]
 
   @@index([merchantId, inStock])
+  @@unique([merchantId, title])
   @@map("products")
 }
 

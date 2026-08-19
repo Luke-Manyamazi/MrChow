@@ -2,6 +2,7 @@
   "name": "mrchow-api",
   "version": "1.0.0",
   "private": true,
+  "description": "Shared Express and Prisma API for Mr Chow food, grocery, delivery, and payments in Masvingo, Zimbabwe.",
   "type": "module",
   "scripts": {
     "dev": "nodemon src/server.js",
@@ -16,8 +17,8 @@
     "axios": "^1.11.0",
     "body-parser": "^2.2.0",
     "dotenv": "^17.2.1",
-    "express": "^5.1.0"
-    ,"paynow": "^1.0.0"
+    "express": "^5.1.0",
+    "paynow": "^1.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10",

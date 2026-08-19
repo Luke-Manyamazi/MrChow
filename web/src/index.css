@@ -1,0 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
+@import 'tailwindcss';
+
+@theme { --font-display: 'Fraunces', Georgia, serif; --font-sans: 'DM Sans', sans-serif; }
+
+:root { font-synthesis: none; }
+body { font-family: var(--font-sans); }
+.eyebrow { @apply font-sans text-[11px] font-bold uppercase tracking-[.18em] text-[#ec7449]; }
+.pill { @apply inline-flex items-center gap-2 rounded-full border border-[#dce4d7] bg-white px-3 py-2; }
+.button-primary { @apply inline-flex items-center gap-2 rounded-xl bg-[#ec7449] px-5 py-3 font-sans text-sm font-bold text-white shadow-lg shadow-[#ec7449]/20 transition hover:-translate-y-0.5 hover:bg-[#d95f36]; }

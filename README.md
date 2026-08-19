@@ -23,6 +23,8 @@ The API foundation is available now. Production authentication, client applicati
 4. Apply the schema to a development database with `npx prisma migrate dev --name init`.
 5. Start the API with `npm run dev`.
 
+The polished React web client lives in `web/`. Run it separately during development with `cd web && npm install && npm run dev`; it opens at `http://localhost:5173` and proxies API calls to the backend on port `3012`. Build it for deployment with `npm run build` from the `web/` directory.
+
 The health check is available at `GET /health`.
 
 ## API
@@ -39,6 +41,10 @@ The health check is available at `GET /health`.
 - `PATCH /api/v1/delivery/orders/:orderId/status` (driver or admin role)
 - `GET /api/v1/whatsapp/webhook`
 - `POST /api/v1/whatsapp/webhook`
+
+## Client apps
+
+The `web/` client is the first shared UI surface for customer ordering, admin operations, and WhatsApp integration visibility. It uses React, Tailwind CSS, Framer Motion, and Lucide icons. The same REST API is ready to be consumed by an Expo/React Native mobile app, which should share the customer ordering and delivery contracts rather than duplicate business logic.
 
 Order creation expects `user_id`, `merchant_id`, `items` with `product_id` and `quantity`, and an optional `location` with `latitude` and `longitude`. Prices are read from the database and totals are calculated on the server.
 

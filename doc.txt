@@ -1,0 +1,88 @@
+You are a Lead Software Architect. Build the core backend API for Mr Chow, a hybrid food and grocery delivery platform tailored for Zimbabwe (launching in Masvingo). The backend must support incoming orders from both a WhatsApp Cloud API Webhook and a REST API (for Mobile Apps/PWAs) using a unified database and business logic.
+
+Tech Stack:
+
+Runtime: Node.js (TypeScript or ES Modules JavaScript)
+
+Framework: Express.js
+
+Database: PostgreSQL (Supabase / Prisma ORM preferred)
+
+Validation & Parsing: body-parser, dotenv
+
+Database Schema Requirements
+Generate Prisma models (or PostgreSQL SQL scripts) for the following entities:
+
+Users
+
+id (UUID), phone_number (Unique, string), full_name, preferred_channel (WHATSAPP or APP), created_at
+
+Merchants (Restaurants)
+
+id, name, city (Default: "Masvingo"), address, is_active (Boolean)
+
+Products (Menu Items)
+
+id, merchant_id (FK), title, description, price_usd (Decimal), in_stock (Boolean)
+
+Orders
+
+id (UUID), user_id (FK), merchant_id (FK), order_source (WHATSAPP or APP), status (PENDING, PREPARING, OUT_FOR_DELIVERY, DELIVERED, CANCELLED), total_amount_usd, delivery_lat, delivery_lng, created_at
+
+OrderItems
+
+id, order_id (FK), product_id (FK), quantity, unit_price
+
+API Routes & Controllers to Implement
+1. Meta WhatsApp Webhook Endpoint (/api/v1/whatsapp/webhook)
+GET /api/v1/whatsapp/webhook: Implement Meta's webhook verification logic (checking hub.mode, hub.verify_token, and returning hub.challenge).
+
+POST /api/v1/whatsapp/webhook: Process incoming payload events:
+
+Parse incoming text messages (e.g., "Hi", "Menu").
+
+Parse incoming interactive button replies (e.g., selecting restaurants or checking order status).
+
+Parse incoming location objects (extract raw latitude and longitude).
+
+Upsert the user into the Users table by phone number.
+
+2. WhatsApp Response Service (/services/whatsappService.js)
+Create helper functions using axios to make POST requests to Meta's WhatsApp Graph API ([https://graph.facebook.com/v18.0/](https://graph.facebook.com/v18.0/){PHONE_NUMBER_ID}/messages):
+
+sendInteractiveButtons(to, text, buttonsArray)
+
+sendListMessage(to, header, title, sections)
+
+sendTextMessage(to, text)
+
+3. Standard REST Order Endpoints (For Mobile/Web App)
+GET /api/v1/merchants: Fetch active merchants in Masvingo.
+
+GET /api/v1/merchants/:id/products: Fetch menu items for a specific merchant.
+
+POST /api/v1/orders: Create a new order from the mobile app (accepting user_id, merchant_id, items[], and location).
+
+Code Architecture & Instructions
+Structure the project modularly:
+
+Plaintext
+src/
+├── config/       # Environment variables & DB connection
+├── controllers/  # Webhook and REST API handlers
+├── services/     # Meta WhatsApp API integration & order logic
+├── routes/       # Express route definitions
+└── prisma/       # Database schemas & migrations
+Set up an .env.example file containing placeholders for:
+
+PORT=3000
+
+DATABASE_URL
+
+WHATSAPP_VERIFY_TOKEN
+
+WHATSAPP_TOKEN (Meta Temporary/Permanent Token)
+
+WHATSAPP_PHONE_NUMBER_ID
+
+Write clean, modular code with explicit error-handling middleware for Express.

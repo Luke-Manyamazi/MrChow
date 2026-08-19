@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PreferredChannel {
+  WHATSAPP
+  APP
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  MERCHANT
+  DRIVER
+}
+
+enum OrderSource {
+  WHATSAPP
+  APP
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum DeliveryStatus {
+  UNASSIGNED
+  ASSIGNED
+  PICKED_UP
+  DELIVERED
+}
+
+enum PaymentProvider {
+  PAYNOW
+}
+
+enum PaymentMethod {
+  VISA
+  MASTERCARD
+  ECOCASH
+  ONEMONEY
+  TELECASH
+}
+
+enum PaymentStatus {
+  PENDING
+  INITIATED
+  PAID
+  FAILED
+  CANCELLED
+}
+
+model User {
+  id              String          @id @default(uuid()) @db.Uuid
+  phoneNumber     String          @unique @map("phone_number")
+  fullName        String?         @map("full_name")
+  preferredChannel PreferredChannel @default(APP) @map("preferred_channel")
+  role            UserRole        @default(CUSTOMER)
+  passwordHash    String?         @map("password_hash")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  orders          Order[]
+  deliveryAssignments DeliveryAssignment[]
+
+  @@map("users")
+}
+
+model Merchant {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String
+  city      String    @default("Masvingo")
+  address   String?
+  isActive  Boolean   @default(true) @map("is_active")
+  products  Product[]
+  orders    Order[]
+
+  @@index([city, isActive])
+  @@map("merchants")
+}
+
+model Product {
+  id          String      @id @default(uuid()) @db.Uuid
+  merchantId  String      @map("merchant_id") @db.Uuid
+  title       String
+  description String?
+  priceUsd    Decimal     @map("price_usd") @db.Decimal(10, 2)
+  inStock     Boolean     @default(true) @map("in_stock")
+  merchant    Merchant    @relation(fields: [merchantId], references: [id])
+  orderItems  OrderItem[]
+
+  @@index([merchantId, inStock])
+  @@map("products")
+}
+
+model Order {
+  id              String      @id @default(uuid()) @db.Uuid
+  userId          String      @map("user_id") @db.Uuid
+  merchantId      String      @map("merchant_id") @db.Uuid
+  orderSource     OrderSource @map("order_source")
+  status          OrderStatus @default(PENDING)
+  totalAmountUsd  Decimal     @map("total_amount_usd") @db.Decimal(10, 2)
+  deliveryLat     Decimal?    @map("delivery_lat") @db.Decimal(9, 6)
+  deliveryLng     Decimal?    @map("delivery_lng") @db.Decimal(9, 6)
+  createdAt       DateTime    @default(now()) @map("created_at")
+  user            User        @relation(fields: [userId], references: [id])
+  merchant        Merchant    @relation(fields: [merchantId], references: [id])
+  items           OrderItem[]
+  deliveryAssignment DeliveryAssignment?
+  payment         Payment?
+
+  @@index([userId, createdAt])
+  @@index([merchantId, status])
+  @@map("orders")
+}
+
+model DeliveryAssignment {
+  id          String         @id @default(uuid()) @db.Uuid
+  orderId     String         @unique @map("order_id") @db.Uuid
+  driverId    String?        @map("driver_id") @db.Uuid
+  status      DeliveryStatus @default(UNASSIGNED)
+  assignedAt  DateTime?      @map("assigned_at")
+  pickedUpAt  DateTime?      @map("picked_up_at")
+  deliveredAt DateTime?      @map("delivered_at")
+  order       Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  driver      User?          @relation(fields: [driverId], references: [id])
+
+  @@index([driverId, status])
+  @@map("delivery_assignments")
+}
+
+model Payment {
+  id                String          @id @default(uuid()) @db.Uuid
+  orderId           String          @unique @map("order_id") @db.Uuid
+  provider          PaymentProvider
+  method            PaymentMethod
+  status            PaymentStatus   @default(PENDING)
+  amountUsd         Decimal         @map("amount_usd") @db.Decimal(10, 2)
+  providerReference String?         @unique @map("provider_reference")
+  checkoutUrl       String?         @map("checkout_url")
+  paidAt            DateTime?       @map("paid_at")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  updatedAt         DateTime        @updatedAt @map("updated_at")
+  order             Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@map("payments")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid()) @db.Uuid
+  orderId   String  @map("order_id") @db.Uuid
+  productId String  @map("product_id") @db.Uuid
+  quantity  Int
+  unitPrice Decimal @map("unit_price") @db.Decimal(10, 2)
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([orderId, productId])
+  @@map("order_items")
+}
